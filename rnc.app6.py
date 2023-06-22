@@ -138,23 +138,23 @@ if submit_button:
     filename = f"registros_nao_conformidades_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
     doc.save(filename)
 
-    # Converter para PDF usando pyppeteer e docx2pdf
+   # Converter para PDF usando pyppeteer e docx2pdf
     pdf_filename = filename.replace('.docx', '.pdf')
 
-    async def convert_to_pdf():
-        browser = await launch()
-        page = await browser.newPage()
-        await page.goto(f"file:///{os.path.abspath(filename)}")
-        await page.pdf({"path": pdf_filename, "format": "A4"})
-        await browser.close()
+async def convert_to_pdf():
+    browser = await launch()
+    page = await browser.newPage()
+    await page.goto(f"file:///{os.path.abspath(filename)}")
+    await page.pdf({"path": pdf_filename, "format": "A4"})
+    await browser.close()
 
-    st.asyncio.run(convert_to_pdf())
+st.experimental_asyncio.run(convert_to_pdf())
 
-    # Exibir link para download do arquivo PDF
-    with open(pdf_filename, 'rb') as f:
-        base64_encoded_pdf = base64.b64encode(f.read()).decode()
-        href = f"<a href='data:application/octet-stream;base64,{base64_encoded_pdf}' download='{pdf_filename}'>Baixar Arquivo PDF</a>"
-        st.markdown(href, unsafe_allow_html=True)
+# Exibir link para download do arquivo PDF
+with open(pdf_filename, 'rb') as f:
+    base64_encoded_pdf = base64.b64encode(f.read()).decode()
+    href = f"<a href='data:application/octet-stream;base64,{base64_encoded_pdf}' download='{pdf_filename}'>Baixar Arquivo PDF</a>"
+    st.markdown(href, unsafe_allow_html=True)
 
     # Limpar os campos do formulário
     nao_conformidade_aberta_por = ""
