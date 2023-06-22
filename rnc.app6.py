@@ -5,17 +5,13 @@ from docx import Document
 import base64
 import os
 
-# Título no site
+# Título
 st.title("Registro de Não Conformidades")
 st.header("POP.ENF.LAB-PC 010")
-
-# Título no documento
-template_path = 'template.docx'
-doc = Document(template_path)
+# Título
 doc.add_heading("Registro de Não Conformidades", level=1)
 doc.add_heading("POP.ENF.LAB-PC 010", level=2)
-
-# Restante do código...
+st.set_page_config(page_title="Registro de Não Conformidades")
 
 # Dados iniciais
 registros = []
@@ -129,26 +125,11 @@ if submit_button:
     filename = f"registros_nao_conformidades_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
     doc.save(filename)
 
-    from docx2pdf import convert
-
-    # Salvar o documento DOCX com nome específico
-    filename = f"registros_nao_conformidades_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
-    doc.save(filename)
-    
-    # Converter o arquivo DOCX em PDF
-    pdf_filename = filename.replace('.docx', '.pdf')
-    convert(filename, pdf_filename)
-    
-    # Exibir link para download do arquivo PDF
-    if os.path.isfile(pdf_filename):
-        with open(pdf_filename, 'rb') as f:
-            base64_encoded_pdf = base64.b64encode(f.read()).decode()
-            href = f"<a href='data:application/octet-stream;base64,{base64_encoded_pdf}' download='{pdf_filename}'>Baixar Arquivo PDF</a>"
-            st.markdown(href, unsafe_allow_html=True)
-    else:
-        st.error("Ocorreu um erro ao gerar o arquivo PDF.")
-
-
+    # Exibir link para download do arquivo DOCX
+    with open(filename, 'rb') as f:
+        base64_encoded_docx = base64.b64encode(f.read()).decode()
+        href = f"<a href='data:application/octet-stream;base64,{base64_encoded_docx}' download='{filename}'>Baixar Arquivo DOCX</a>"
+        st.markdown(href, unsafe_allow_html=True)
 
     # Limpar os campos do formulário
     nao_conformidade_aberta_por = ""
@@ -172,16 +153,8 @@ if df is not None:
     df['Data do Registro'] = pd.to_datetime(df['Data do Registro'], format="%d/%m/%Y %H:%M:%S", errors='coerce')
     df['Mês'] = df['Data do Registro'].dt.month
     df['Ano'] = df['Data do Registro'].dt.year
-    df['Dia'] = df['Data do Registro'].dt.day
-
-    # Registros por Mês
     registros_por_mes = df.groupby('Mês').size()
-
-    # Registros por Ano
     registros_por_ano = df.groupby('Ano').size()
-
-    # Registros por Dia
-    registros_por_dia = df.groupby(['Ano', 'Mês', 'Dia']).size().reset_index()
 
     # Exibir os indicadores
     st.subheader("Indicadores")
@@ -189,5 +162,3 @@ if df is not None:
     st.dataframe(registros_por_mes)
     st.write("Registros por Ano:")
     st.dataframe(registros_por_ano)
-    st.write("Registros por Dia:")
-    st.dataframe(registros_por_dia)
