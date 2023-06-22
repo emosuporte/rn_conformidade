@@ -10,14 +10,6 @@ registros = []
 df = pd.read_excel('registros_nao_conformidades.xlsx') if 'registros_nao_conformidades.xlsx' in os.listdir() else None
 contador_registro = len(df) + 1 if df is not None else 1
 
-# Título
-st.title("Registro de Não Conformidades")
-st.header("POP.ENF.LAB-PC 010")
-# Título
-doc.add_heading("Registro de Não Conformidades", level=1)
-doc.add_heading("POP.ENF.LAB-PC 010", level=2)
-st.set_page_config(page_title="Registro de Não Conformidades")
-
 # Carregar o modelo de documento (template)
 template_path = 'template.docx'
 
