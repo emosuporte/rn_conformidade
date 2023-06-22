@@ -4,6 +4,8 @@ from datetime import datetime
 from docx import Document
 import base64
 import os
+from docx2pdf import convert
+import matplotlib.pyplot as plt
 
 # Título no site
 st.title("Registro de Não Conformidades")
@@ -14,8 +16,6 @@ template_path = 'template.docx'
 doc = Document(template_path)
 doc.add_heading("Registro de Não Conformidades", level=1)
 doc.add_heading("POP.ENF.LAB-PC 010", level=2)
-
-# Restante do código...
 
 # Dados iniciais
 registros = []
@@ -126,13 +126,17 @@ if submit_button:
     docx_replace(doc, "[RESPONSAVEL_ACAO_CORRETIVA]", responsavel_acao_corretiva)
 
     # Salvar o documento DOCX com nome específico
-    filename = f"registros_nao_conformidades_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
-    doc.save(filename)
+    doc_filename = f"registros_nao_conformidades_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
+    doc.save(doc_filename)
 
-    # Exibir link para download do arquivo DOCX
-    with open(filename, 'rb') as f:
-        base64_encoded_docx = base64.b64encode(f.read()).decode()
-        href = f"<a href='data:application/octet-stream;base64,{base64_encoded_docx}' download='{filename}'>Baixar Arquivo DOCX</a>"
+    # Converter o documento DOCX para PDF
+    pdf_filename = f"registros_nao_conformidades_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+    convert(doc_filename, pdf_filename)
+
+    # Exibir link para download do arquivo PDF
+    with open(pdf_filename, 'rb') as f:
+        base64_encoded_pdf = base64.b64encode(f.read()).decode()
+        href = f"<a href='data:application/octet-stream;base64,{base64_encoded_pdf}' download='{pdf_filename}'>Baixar Arquivo PDF</a>"
         st.markdown(href, unsafe_allow_html=True)
 
     # Limpar os campos do formulário
@@ -155,14 +159,26 @@ if submit_button:
 # Manipulação dos dados e indicadores
 if df is not None:
     df['Data do Registro'] = pd.to_datetime(df['Data do Registro'], format="%d/%m/%Y %H:%M:%S", errors='coerce')
+    df['Dia'] = df['Data do Registro'].dt.day
     df['Mês'] = df['Data do Registro'].dt.month
     df['Ano'] = df['Data do Registro'].dt.year
+    registros_por_dia = df.groupby('Dia').size()
     registros_por_mes = df.groupby('Mês').size()
     registros_por_ano = df.groupby('Ano').size()
 
     # Exibir os indicadores
     st.subheader("Indicadores")
+    st.write("Registros por Dia:")
+    st.dataframe(registros_por_dia)
     st.write("Registros por Mês:")
     st.dataframe(registros_por_mes)
     st.write("Registros por Ano:")
     st.dataframe(registros_por_ano)
+
+    # Gráfico de Registros por Dia
+    fig, ax = plt.subplots()
+    ax.bar(registros_por_dia.index, registros_por_dia.values)
+    ax.set_xlabel("Dia")
+    ax.set_ylabel("Quantidade de Registros")
+    ax.set_title("Registros por Dia")
+    st.pyplot(fig)
