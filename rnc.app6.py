@@ -9,9 +9,9 @@ import os
 st.title("Registro de Não Conformidades")
 st.header("POP.ENF.LAB-PC 010")
 # Título
-doc.add_heading("Registro de Não Conformidades", level=1)
-doc.add_heading("POP.ENF.LAB-PC 010", level=2)
-st.set_page_config(page_title="Registro de Não Conformidades")
+#doc.add_heading("Registro de Não Conformidades", level=1)
+#doc.add_heading("POP.ENF.LAB-PC 010", level=2)
+#st.set_page_config(page_title="Registro de Não Conformidades")
 
 # Dados iniciais
 registros = []
