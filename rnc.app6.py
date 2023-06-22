@@ -191,7 +191,10 @@ if df is not None:
     df['Data do Fato'] = pd.to_datetime(df['Data do Fato'], format="%d/%m/%Y", errors='coerce')
     df['Dia do Fato'] = df['Data do Fato'].dt.day.astype(str)  # Converter para string
     registros_por_dia = df.groupby(['Ano', 'Mês', 'Dia do Fato']).size().reset_index()
-    registros_por_dia['Data'] = pd.to_datetime(registros_por_dia[['Ano', 'Mês', 'Dia do Fato']].astype(str), format='%Y-%m-%d')
+
+# Converter para formato de data
+registros_por_dia['Data'] = registros_por_dia.apply(lambda row: datetime(row['Ano'], row['Mês'], int(row['Dia do Fato'])), axis=1)
+
 
 
     # Exibir os indicadores
