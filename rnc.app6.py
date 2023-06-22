@@ -5,7 +5,8 @@ from docx import Document
 import base64
 import os
 from pyppeteer import launch
-from docx2pdf import convert
+import asyncio
+
 
 # Título no site
 st.title("Registro de Não Conformidades")
