@@ -123,7 +123,7 @@ with st.form(key='registro_form'):
         # Gráfico de Registros por Mês
         st.write("Gráfico de Registros por Mês:")
         registros_por_mes_chart = registros_por_mes.copy()
-        registros_por_mes_chart['Data'] = pd.to_datetime(registros_por_mes_chart[['Ano', 'Mês']])
+        registros_por_mes_chart['Data'] = pd.to_datetime(registros_por_mes_chart['Ano'].astype(str) + '-' + registros_por_mes_chart['Mês'].astype(str))
         registros_por_mes_chart = registros_por_mes_chart.sort_values('Data')
         st.line_chart(registros_por_mes_chart['Data'], registros_por_mes_chart[0])
     
