@@ -91,7 +91,7 @@ with st.form(key='registro_form'):
     descreva_o_fato = st.text_area("Descreva o Fato", value=descreva_o_fato)
 
     # Data do Fato
-    data_fato = st.date_input("Data do Fato", value=data_fato)
+    data_fato = st.text_input("Data do Fato", value=data_fato)
 
     # Ação Corretiva Imediata
     acao_corretiva_imediata = st.text_area("Ação Corretiva Imediata", value=acao_corretiva_imediata)
@@ -130,7 +130,7 @@ if submit_button:
     docx_replace(doc, "[NUMERO_PEDIDO_CLIENTE]", numero_pedido_cliente)
     docx_replace(doc, "[TIPO_NAO_CONFORMIDADE]", tipo_nao_conformidade)
     docx_replace(doc, "[DESCREVA_O_FATO]", descreva_o_fato)
-    docx_replace(doc, "[DATA_DO_FATO]", data_fato.strftime("%d/%m/%Y"))
+    docx_replace(doc, "[DATA_DO_FATO]", data_fato)
     docx_replace(doc, "[ACAO_CORRETIVA_IMEDIATA]", acao_corretiva_imediata)
     docx_replace(doc, "[RESPONSAVEL_ACAO_CORRETIVA]", responsavel_acao_corretiva)
 
@@ -188,15 +188,8 @@ if df is not None:
     registros_por_ano = df.groupby('Ano').size()
 
     # Registros por Dia
-    df['Data do Fato'] = pd.to_datetime(df['Data do Fato'], format="%d/%m/%Y", errors='coerce')
-    df['Dia do Fato'] = df['Data do Fato'].dt.day.astype(str)  # Converter para string
-    registros_por_dia = df.groupby(['Ano', 'Mês', 'Dia do Fato']).size().reset_index()
-
-    # Converter para formato de data
-    registros_por_dia['Data'] = registros_por_dia.apply(lambda row: datetime(row['Ano'], row['Mês'], int(row['Dia do Fato'])), axis=1)
-
-
-
+    registros_por_dia = df.groupby(['Ano', 'Mês', 'Data do Fato']).size().reset_index()
+    registros_por_dia['Data'] = pd.to_datetime(registros_por_dia['Data do Fato'], format='%d/%m/%Y')
 
     # Exibir os indicadores
     st.subheader("Indicadores")
