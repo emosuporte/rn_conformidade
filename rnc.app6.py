@@ -109,7 +109,7 @@ with st.form(key='registro_form'):
         # Gráfico de Registros por Dia
         st.write("Gráfico de Registros por Dia:")
         registros_por_dia_chart = registros_por_dia.copy()
-        registros_por_dia_chart['Data'] = pd.to_datetime(registros_por_dia_chart[['Ano', 'Mês', 'Dia']])
+        registros_por_dia_chart['Data'] = pd.to_datetime(registros_por_dia_chart[['Ano', 'Mês', 'Dia']].astype(str).agg('-'.join, axis=1))
         registros_por_dia_chart = registros_por_dia_chart.sort_values('Data')
         st.line_chart(registros_por_dia_chart['Data'], registros_por_dia_chart[0])
     
