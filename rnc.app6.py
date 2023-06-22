@@ -139,7 +139,7 @@ if submit_button:
     doc.save(filename)
 
    # Converter para PDF usando pyppeteer e docx2pdf
-    pdf_filename = filename.replace('.docx', '.pdf')
+pdf_filename = filename.replace('.docx', '.pdf')
 
 async def convert_to_pdf():
     browser = await launch()
@@ -148,13 +148,16 @@ async def convert_to_pdf():
     await page.pdf({"path": pdf_filename, "format": "A4"})
     await browser.close()
 
-st.experimental_asyncio.run(convert_to_pdf())
+import nest_asyncio
+nest_asyncio.apply()
+asyncio.run(convert_to_pdf())
 
 # Exibir link para download do arquivo PDF
 with open(pdf_filename, 'rb') as f:
     base64_encoded_pdf = base64.b64encode(f.read()).decode()
     href = f"<a href='data:application/octet-stream;base64,{base64_encoded_pdf}' download='{pdf_filename}'>Baixar Arquivo PDF</a>"
     st.markdown(href, unsafe_allow_html=True)
+
 
     # Limpar os campos do formulário
     nao_conformidade_aberta_por = ""
