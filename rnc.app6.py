@@ -132,13 +132,21 @@ if submit_button:
     # Converter para PDF usando python-docx
     pdf_filename = filename.replace('.docx', '.pdf')
     os.system(f"libreoffice --headless --convert-to pdf {filename} --outdir .")
-    os.rename(filename.replace('.docx', '.pdf'), pdf_filename)
 
-    # Exibir link para download do arquivo PDF
-    with open(pdf_filename, 'rb') as f:
-        base64_encoded_pdf = base64.b64encode(f.read()).decode()
-        href = f"<a href='data:application/octet-stream;base64,{base64_encoded_pdf}' download='{pdf_filename}'>Baixar Arquivo PDF</a>"
-        st.markdown(href, unsafe_allow_html=True)
+    if os.path.isfile(pdf_filename):
+        os.rename(pdf_filename, pdf_filename)
+    else:
+        st.error("Ocorreu um erro ao converter o arquivo para PDF.")
+
+    # Exibir link para download do arquivo PDF    
+    if os.path.isfile(pdf_filename):
+        with open(pdf_filename, 'rb') as f:
+            base64_encoded_pdf = base64.b64encode(f.read()).decode()
+            href = f"<a href='data:application/octet-stream;base64,{base64_encoded_pdf}' download='{pdf_filename}'>Baixar Arquivo PDF</a>"
+            st.markdown(href, unsafe_allow_html=True)
+    else:
+        st.error("Ocorreu um erro ao gerar o arquivo PDF.")
+
 
     # Limpar os campos do formulário
     nao_conformidade_aberta_por = ""
