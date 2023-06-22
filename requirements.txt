@@ -1,8 +1,7 @@
 streamlit
 pandas
-numpy
-xlrd
-openpyxl
-xlsxwriter
 python-docx
-matplotlib
+base64
+pyppeteer
+docx2pdf
+xlsxwriter
