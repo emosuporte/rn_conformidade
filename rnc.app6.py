@@ -91,64 +91,7 @@ with st.form(key='registro_form'):
     # Botão para Registrar Não Conformidade
     submit_button = st.form_submit_button(label='Registrar Não Conformidade')
 
-# Manipulação dos dados
-if submit_button:
-    novo_registro = {
-        "Número de Registro": contador_registro,
-        "Data do Registro": data_registro,
-        "Não Conformidade Aberta por": nao_conformidade_aberta_por,
-        "Nº Pedido do Cliente": numero_pedido_cliente,
-        "Tipo de Não Conformidade": tipo_nao_conformidade,
-        "Descreva o Fato": descreva_o_fato,
-        "Ação Corretiva Imediata": acao_corretiva_imediata,
-        "Responsável pela Ação Corretiva Imediata": responsavel_acao_corretiva
-    }
-    registros.append(novo_registro)
-
-    # Exibir mensagem de sucesso
-    st.success("Registro de Não Conformidade realizado com sucesso!")
-
-    # Carregar o modelo de documento (template)
-    doc = Document(template_path)
-
-    # Preencher campos do modelo de documento
-    docx_replace(doc, "[CONTADOR_REGISTRO]", contador_registro_text)
-    docx_replace(doc, "[DATA_REGISTRO]", data_registro)
-    docx_replace(doc, "[NAO_CONFORMIDADE_ABERTA_POR]", nao_conformidade_aberta_por)
-    docx_replace(doc, "[NUMERO_PEDIDO_CLIENTE]", numero_pedido_cliente)
-    docx_replace(doc, "[TIPO_NAO_CONFORMIDADE]", tipo_nao_conformidade)
-    docx_replace(doc, "[DESCREVA_O_FATO]", descreva_o_fato)
-    docx_replace(doc, "[ACAO_CORRETIVA_IMEDIATA]", acao_corretiva_imediata)
-    docx_replace(doc, "[RESPONSAVEL_ACAO_CORRETIVA]", responsavel_acao_corretiva)
-
-    # Salvar o documento DOCX com nome específico
-    filename = f"registros_nao_conformidades_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
-    doc.save(filename)
-
-    # Exibir link para download do arquivo DOCX
-    with open(filename, 'rb') as f:
-        base64_encoded_docx = base64.b64encode(f.read()).decode()
-        href = f"<a href='data:application/octet-stream;base64,{base64_encoded_docx}' download='{filename}'>Baixar Arquivo DOCX</a>"
-        st.markdown(href, unsafe_allow_html=True)
-
-    # Limpar os campos do formulário
-    nao_conformidade_aberta_por = ""
-    numero_pedido_cliente = ""
-    tipo_nao_conformidade = ""
-    descreva_o_fato = ""
-    acao_corretiva_imediata = ""
-    responsavel_acao_corretiva = ""
-
-    # Atualizar DataFrame com novo registro
-    if df is None:
-        df = pd.DataFrame(registros)
-    else:
-        df = pd.concat([df, pd.DataFrame(registros)])
-
-    # Salvar DataFrame atualizado no arquivo Excel
-    df.to_excel('registros_nao_conformidades.xlsx', index=False)
-
-   # Manipulação dos dados e indicadores
+# Manipulação dos dados e indicadores
     if df is not None:
         df['Data do Registro'] = pd.to_datetime(df['Data do Registro'], format="%d/%m/%Y %H:%M:%S", errors='coerce')
         df['Dia'] = df['Data do Registro'].dt.day
@@ -168,7 +111,7 @@ if submit_button:
         registros_por_dia_chart = registros_por_dia.copy()
         registros_por_dia_chart['Data'] = registros_por_dia_chart.apply(lambda row: datetime(row['Ano'], row['Mês'], row['Dia']), axis=1)
         registros_por_dia_chart = registros_por_dia_chart.sort_values('Data')
-        st.line_chart(registros_por_dia_chart['Data'], registros_por_dia_chart[0])
+        st.line_chart(registros_por_dia_chart['Data'].astype(str), registros_por_dia_chart[0])
     
         # Registros por Mês
         registros_por_mes = df.groupby(['Ano', 'Mês']).size().reset_index()
@@ -182,7 +125,7 @@ if submit_button:
         registros_por_mes_chart = registros_por_mes.copy()
         registros_por_mes_chart['Data'] = registros_por_mes_chart.apply(lambda row: datetime(row['Ano'], row['Mês'], 1), axis=1)
         registros_por_mes_chart = registros_por_mes_chart.sort_values('Data')
-        st.line_chart(registros_por_mes_chart['Data'], registros_por_mes_chart[0])
+        st.line_chart(registros_por_mes_chart['Data'].astype(str), registros_por_mes_chart[0])
     
         # Registros por Ano
         registros_por_ano = df.groupby('Ano').size().reset_index()
