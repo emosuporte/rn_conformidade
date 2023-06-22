@@ -1,7 +1,3 @@
 streamlit
 pandas
-python-docx
-base64
 pyppeteer
-docx2pdf
-xlsxwriter
