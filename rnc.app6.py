@@ -129,16 +129,17 @@ if submit_button:
     filename = f"registros_nao_conformidades_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
     doc.save(filename)
 
-    # Converter para PDF usando python-docx
+    from docx2pdf import convert
+
+    # Salvar o documento DOCX com nome específico
+    filename = f"registros_nao_conformidades_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
+    doc.save(filename)
+    
+    # Converter o arquivo DOCX em PDF
     pdf_filename = filename.replace('.docx', '.pdf')
-    os.system(f"libreoffice --headless --convert-to pdf {filename} --outdir .")
-
-    if os.path.isfile(pdf_filename):
-        os.rename(pdf_filename, pdf_filename)
-    else:
-        st.error("Ocorreu um erro ao converter o arquivo para PDF.")
-
-    # Exibir link para download do arquivo PDF    
+    convert(filename, pdf_filename)
+    
+    # Exibir link para download do arquivo PDF
     if os.path.isfile(pdf_filename):
         with open(pdf_filename, 'rb') as f:
             base64_encoded_pdf = base64.b64encode(f.read()).decode()
@@ -146,6 +147,7 @@ if submit_button:
             st.markdown(href, unsafe_allow_html=True)
     else:
         st.error("Ocorreu um erro ao gerar o arquivo PDF.")
+
 
 
     # Limpar os campos do formulário
