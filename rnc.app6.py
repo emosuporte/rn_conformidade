@@ -109,9 +109,9 @@ with st.form(key='registro_form'):
         # Gráfico de Registros por Dia
         st.write("Gráfico de Registros por Dia:")
         registros_por_dia_chart = registros_por_dia.copy()
-        registros_por_dia_chart['Data'] = registros_por_dia_chart.apply(lambda row: datetime(row['Ano'], row['Mês'], row['Dia']), axis=1)
+        registros_por_dia_chart['Data'] = pd.to_datetime(registros_por_dia_chart[['Ano', 'Mês', 'Dia']])
         registros_por_dia_chart = registros_por_dia_chart.sort_values('Data')
-        st.line_chart(registros_por_dia_chart['Data'].astype(str), registros_por_dia_chart[0])
+        st.line_chart(registros_por_dia_chart['Data'], registros_por_dia_chart[0])
     
         # Registros por Mês
         registros_por_mes = df.groupby(['Ano', 'Mês']).size().reset_index()
@@ -123,9 +123,9 @@ with st.form(key='registro_form'):
         # Gráfico de Registros por Mês
         st.write("Gráfico de Registros por Mês:")
         registros_por_mes_chart = registros_por_mes.copy()
-        registros_por_mes_chart['Data'] = registros_por_mes_chart.apply(lambda row: datetime(row['Ano'], row['Mês'], 1), axis=1)
+        registros_por_mes_chart['Data'] = pd.to_datetime(registros_por_mes_chart[['Ano', 'Mês']])
         registros_por_mes_chart = registros_por_mes_chart.sort_values('Data')
-        st.line_chart(registros_por_mes_chart['Data'].astype(str), registros_por_mes_chart[0])
+        st.line_chart(registros_por_mes_chart['Data'], registros_por_mes_chart[0])
     
         # Registros por Ano
         registros_por_ano = df.groupby('Ano').size().reset_index()
