@@ -4,8 +4,7 @@ from datetime import datetime
 from docx import Document
 import base64
 import os
-from pyppeteer import launch
-import asyncio
+from docx2pdf import convert
 
 
 # Título no site
@@ -41,14 +40,6 @@ def docx_replace(doc, old_text, new_text):
         for row in table.rows:
             for cell in row.cells:
                 docx_replace(cell, old_text, new_text)
-
-# Função para imprimir documento DOCX em PDF usando pyppeteer
-async def print_to_pdf(docx_path, pdf_path):
-    browser = await launch()
-    page = await browser.newPage()
-    await page.goto(f"file:///{os.path.abspath(docx_path)}")
-    await page.pdf({"path": pdf_path, "format": "A4"})
-    await browser.close()
 
 # Inicializar variáveis
 nao_conformidade_aberta_por = ""
@@ -140,10 +131,9 @@ if submit_button:
     filename = f"registros_nao_conformidades_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
     doc.save(filename)
 
-    # Converter para PDF usando pyppeteer
+    # Converter para PDF usando docx2pdf
     pdf_filename = filename.replace('.docx', '.pdf')
-
-    asyncio.get_event_loop().run_until_complete(print_to_pdf(filename, pdf_filename))
+    convert(filename, pdf_filename)
 
     # Exibir link para download do arquivo PDF
     with open(pdf_filename, 'rb') as f:
@@ -192,3 +182,8 @@ if df is not None:
     st.dataframe(registros_por_ano)
     st.write("Registros por Dia:")
     st.dataframe(registros_por_dia)
+
+    # Gráficos das situações
+    st.subheader("Gráficos das Situações")
+    registros_por_situacao = df.groupby('Tipo de Não Conformidade').size()
+    st.bar_chart(registros_por_situacao)
