@@ -197,6 +197,7 @@ if df is not None:
 
 
 
+
     # Exibir os indicadores
     st.subheader("Indicadores")
     st.write("Registros por Mês:")
