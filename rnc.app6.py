@@ -149,35 +149,35 @@ if submit_button:
     df.to_excel('registros_nao_conformidades.xlsx', index=False)
 
    # Manipulação dos dados e indicadores
-if df is not None:
-    df['Data do Registro'] = pd.to_datetime(df['Data do Registro'], format="%d/%m/%Y %H:%M:%S", errors='coerce')
-    df['Dia'] = df['Data do Registro'].dt.day
-
-    # Registros por Dia
-    registros_por_dia = df.groupby(['Ano', 'Mês', 'Dia']).size().reset_index()
-
+    if df is not None:
+        df['Data do Registro'] = pd.to_datetime(df['Data do Registro'], format="%d/%m/%Y %H:%M:%S", errors='coerce')
+        df['Dia'] = df['Data do Registro'].dt.day
+    
+        # Registros por Dia
+        registros_por_dia = df.groupby(['Ano', 'Mês', 'Dia']).size().reset_index()
+    
+        # Exibir os indicadores
+        st.write("Registros por Dia:")
+        st.dataframe(registros_por_dia)
+    
+        # Gráfico de Registros por Dia
+        st.write("Gráfico de Registros por Dia:")
+        registros_por_dia_chart = registros_por_dia.copy()
+        registros_por_dia_chart['Data'] = registros_por_dia_chart.apply(lambda row: datetime(row['Ano'], row['Mês'], row['Dia']), axis=1)
+        registros_por_dia_chart = registros_por_dia_chart.sort_values('Data')
+        st.line_chart(registros_por_dia_chart['Data'], registros_por_dia_chart[0])
+    
     # Exibir os indicadores
-    st.write("Registros por Dia:")
-    st.dataframe(registros_por_dia)
-
-    # Gráfico de Registros por Dia
-    st.write("Gráfico de Registros por Dia:")
-    registros_por_dia_chart = registros_por_dia.copy()
-    registros_por_dia_chart['Data'] = registros_por_dia_chart.apply(lambda row: datetime(row['Ano'], row['Mês'], row['Dia']), axis=1)
-    registros_por_dia_chart = registros_por_dia_chart.sort_values('Data')
-    st.line_chart(registros_por_dia_chart['Data'], registros_por_dia_chart[0])
-
-# Exibir os indicadores
-st.subheader("Indicadores")
-st.write("Registros por Mês:")
-st.dataframe(registros_por_mes)
-st.write("Registros por Ano:")
-st.dataframe(registros_por_ano)
-
-# Gráfico de Registros por Mês
-st.write("Gráfico de Registros por Mês:")
-st.bar_chart(registros_por_mes)
-
-# Gráfico de Registros por Ano
-st.write("Gráfico de Registros por Ano:")
-st.bar_chart(registros_por_ano)
+    st.subheader("Indicadores")
+    st.write("Registros por Mês:")
+    st.dataframe(registros_por_mes)
+    st.write("Registros por Ano:")
+    st.dataframe(registros_por_ano)
+    
+    # Gráfico de Registros por Mês
+    st.write("Gráfico de Registros por Mês:")
+    st.bar_chart(registros_por_mes)
+    
+    # Gráfico de Registros por Ano
+    st.write("Gráfico de Registros por Ano:")
+    st.bar_chart(registros_por_ano)
