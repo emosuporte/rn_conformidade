@@ -4,8 +4,6 @@ from datetime import datetime
 from docx import Document
 import base64
 import os
-from docx2pdf import convert
-
 
 # Título no site
 st.title("Registro de Não Conformidades")
@@ -131,9 +129,10 @@ if submit_button:
     filename = f"registros_nao_conformidades_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
     doc.save(filename)
 
-    # Converter para PDF usando docx2pdf
+    # Converter para PDF usando python-docx
     pdf_filename = filename.replace('.docx', '.pdf')
-    convert(filename, pdf_filename)
+    os.system(f"libreoffice --headless --convert-to pdf {filename} --outdir .")
+    os.rename(filename.replace('.docx', '.pdf'), pdf_filename)
 
     # Exibir link para download do arquivo PDF
     with open(pdf_filename, 'rb') as f:
@@ -182,8 +181,3 @@ if df is not None:
     st.dataframe(registros_por_ano)
     st.write("Registros por Dia:")
     st.dataframe(registros_por_dia)
-
-    # Gráficos das situações
-    st.subheader("Gráficos das Situações")
-    registros_por_situacao = df.groupby('Tipo de Não Conformidade').size()
-    st.bar_chart(registros_por_situacao)
