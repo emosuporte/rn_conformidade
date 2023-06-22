@@ -4,9 +4,7 @@ from datetime import datetime
 from docx import Document
 import base64
 import os
-from pyppeteer import launch
-import asyncio
-
+from docx2pdf import convert
 
 # Título no site
 st.title("Registro de Não Conformidades")
@@ -49,7 +47,6 @@ tipo_nao_conformidade = ""
 descreva_o_fato = ""
 acao_corretiva_imediata = ""
 responsavel_acao_corretiva = ""
-data_fato = None
 
 # Formulário de Registro
 with st.form(key='registro_form'):
@@ -90,9 +87,6 @@ with st.form(key='registro_form'):
     # Descreva o Fato
     descreva_o_fato = st.text_area("Descreva o Fato", value=descreva_o_fato)
 
-    # Data do Fato
-    data_fato = st.text_input("Data do Fato", value=data_fato)
-
     # Ação Corretiva Imediata
     acao_corretiva_imediata = st.text_area("Ação Corretiva Imediata", value=acao_corretiva_imediata)
 
@@ -111,7 +105,6 @@ if submit_button:
         "Nº Pedido do Cliente": numero_pedido_cliente,
         "Tipo de Não Conformidade": tipo_nao_conformidade,
         "Descreva o Fato": descreva_o_fato,
-        "Data do Fato": data_fato,
         "Ação Corretiva Imediata": acao_corretiva_imediata,
         "Responsável pela Ação Corretiva Imediata": responsavel_acao_corretiva
     }
@@ -130,7 +123,6 @@ if submit_button:
     docx_replace(doc, "[NUMERO_PEDIDO_CLIENTE]", numero_pedido_cliente)
     docx_replace(doc, "[TIPO_NAO_CONFORMIDADE]", tipo_nao_conformidade)
     docx_replace(doc, "[DESCREVA_O_FATO]", descreva_o_fato)
-    docx_replace(doc, "[DATA_DO_FATO]", data_fato)
     docx_replace(doc, "[ACAO_CORRETIVA_IMEDIATA]", acao_corretiva_imediata)
     docx_replace(doc, "[RESPONSAVEL_ACAO_CORRETIVA]", responsavel_acao_corretiva)
 
@@ -138,33 +130,21 @@ if submit_button:
     filename = f"registros_nao_conformidades_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
     doc.save(filename)
 
-   # Converter para PDF usando pyppeteer e docx2pdf
-pdf_filename = filename.replace('.docx', '.pdf')
+    # Converter para PDF usando docx2pdf
+    pdf_filename = filename.replace('.docx', '.pdf')
+    convert(filename, pdf_filename)
 
-async def convert_to_pdf():
-    browser = await launch()
-    page = await browser.newPage()
-    await page.goto(f"file:///{os.path.abspath(filename)}")
-    await page.pdf({"path": pdf_filename, "format": "A4"})
-    await browser.close()
-
-import nest_asyncio
-nest_asyncio.apply()
-asyncio.run(convert_to_pdf())
-
-# Exibir link para download do arquivo PDF
-with open(pdf_filename, 'rb') as f:
-    base64_encoded_pdf = base64.b64encode(f.read()).decode()
-    href = f"<a href='data:application/octet-stream;base64,{base64_encoded_pdf}' download='{pdf_filename}'>Baixar Arquivo PDF</a>"
-    st.markdown(href, unsafe_allow_html=True)
-
+    # Exibir link para download do arquivo PDF
+    with open(pdf_filename, 'rb') as f:
+        base64_encoded_pdf = base64.b64encode(f.read()).decode()
+        href = f"<a href='data:application/octet-stream;base64,{base64_encoded_pdf}' download='{pdf_filename}'>Baixar Arquivo PDF</a>"
+        st.markdown(href, unsafe_allow_html=True)
 
     # Limpar os campos do formulário
     nao_conformidade_aberta_por = ""
     numero_pedido_cliente = ""
     tipo_nao_conformidade = ""
     descreva_o_fato = ""
-    data_fato = None
     acao_corretiva_imediata = ""
     responsavel_acao_corretiva = ""
 
@@ -191,8 +171,7 @@ if df is not None:
     registros_por_ano = df.groupby('Ano').size()
 
     # Registros por Dia
-    registros_por_dia = df.groupby(['Ano', 'Mês', 'Data do Fato']).size().reset_index()
-    registros_por_dia['Data'] = pd.to_datetime(registros_por_dia['Data do Fato'], format='%d/%m/%Y')
+    registros_por_dia = df.groupby(['Ano', 'Mês', 'Dia']).size().reset_index()
 
     # Exibir os indicadores
     st.subheader("Indicadores")
@@ -202,3 +181,15 @@ if df is not None:
     st.dataframe(registros_por_ano)
     st.write("Registros por Dia:")
     st.dataframe(registros_por_dia)
+
+    # Gráfico de Registros por Mês
+    st.write("Gráfico de Registros por Mês:")
+    st.bar_chart(registros_por_mes)
+
+    # Gráfico de Registros por Ano
+    st.write("Gráfico de Registros por Ano:")
+    st.bar_chart(registros_por_ano)
+
+    # Gráfico de Registros por Dia
+    st.write("Gráfico de Registros por Dia:")
+    st.bar_chart(registros_por_dia)
