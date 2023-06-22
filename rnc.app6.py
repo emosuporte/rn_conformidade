@@ -4,8 +4,8 @@ from datetime import datetime
 from docx import Document
 import base64
 import os
+from pyppeteer import launch
 from docx2pdf import convert
-import matplotlib.pyplot as plt
 
 # Título no site
 st.title("Registro de Não Conformidades")
@@ -16,6 +16,8 @@ template_path = 'template.docx'
 doc = Document(template_path)
 doc.add_heading("Registro de Não Conformidades", level=1)
 doc.add_heading("POP.ENF.LAB-PC 010", level=2)
+
+# Restante do código...
 
 # Dados iniciais
 registros = []
@@ -46,6 +48,7 @@ tipo_nao_conformidade = ""
 descreva_o_fato = ""
 acao_corretiva_imediata = ""
 responsavel_acao_corretiva = ""
+data_fato = None
 
 # Formulário de Registro
 with st.form(key='registro_form'):
@@ -86,6 +89,9 @@ with st.form(key='registro_form'):
     # Descreva o Fato
     descreva_o_fato = st.text_area("Descreva o Fato", value=descreva_o_fato)
 
+    # Data do Fato
+    data_fato = st.date_input("Data do Fato", value=data_fato)
+
     # Ação Corretiva Imediata
     acao_corretiva_imediata = st.text_area("Ação Corretiva Imediata", value=acao_corretiva_imediata)
 
@@ -104,6 +110,7 @@ if submit_button:
         "Nº Pedido do Cliente": numero_pedido_cliente,
         "Tipo de Não Conformidade": tipo_nao_conformidade,
         "Descreva o Fato": descreva_o_fato,
+        "Data do Fato": data_fato,
         "Ação Corretiva Imediata": acao_corretiva_imediata,
         "Responsável pela Ação Corretiva Imediata": responsavel_acao_corretiva
     }
@@ -122,16 +129,25 @@ if submit_button:
     docx_replace(doc, "[NUMERO_PEDIDO_CLIENTE]", numero_pedido_cliente)
     docx_replace(doc, "[TIPO_NAO_CONFORMIDADE]", tipo_nao_conformidade)
     docx_replace(doc, "[DESCREVA_O_FATO]", descreva_o_fato)
+    docx_replace(doc, "[DATA_DO_FATO]", data_fato.strftime("%d/%m/%Y"))
     docx_replace(doc, "[ACAO_CORRETIVA_IMEDIATA]", acao_corretiva_imediata)
     docx_replace(doc, "[RESPONSAVEL_ACAO_CORRETIVA]", responsavel_acao_corretiva)
 
     # Salvar o documento DOCX com nome específico
-    doc_filename = f"registros_nao_conformidades_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
-    doc.save(doc_filename)
+    filename = f"registros_nao_conformidades_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
+    doc.save(filename)
 
-    # Converter o documento DOCX para PDF
-    pdf_filename = f"registros_nao_conformidades_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
-    convert(doc_filename, pdf_filename)
+    # Converter para PDF usando pyppeteer e docx2pdf
+    pdf_filename = filename.replace('.docx', '.pdf')
+
+    async def convert_to_pdf():
+        browser = await launch()
+        page = await browser.newPage()
+        await page.goto(f"file:///{os.path.abspath(filename)}")
+        await page.pdf({"path": pdf_filename, "format": "A4"})
+        await browser.close()
+
+    st.asyncio.run(convert_to_pdf())
 
     # Exibir link para download do arquivo PDF
     with open(pdf_filename, 'rb') as f:
@@ -144,6 +160,7 @@ if submit_button:
     numero_pedido_cliente = ""
     tipo_nao_conformidade = ""
     descreva_o_fato = ""
+    data_fato = None
     acao_corretiva_imediata = ""
     responsavel_acao_corretiva = ""
 
@@ -159,26 +176,27 @@ if submit_button:
 # Manipulação dos dados e indicadores
 if df is not None:
     df['Data do Registro'] = pd.to_datetime(df['Data do Registro'], format="%d/%m/%Y %H:%M:%S", errors='coerce')
-    df['Dia'] = df['Data do Registro'].dt.day
     df['Mês'] = df['Data do Registro'].dt.month
     df['Ano'] = df['Data do Registro'].dt.year
-    registros_por_dia = df.groupby('Dia').size()
+    df['Dia'] = df['Data do Registro'].dt.day
+
+    # Registros por Mês
     registros_por_mes = df.groupby('Mês').size()
+
+    # Registros por Ano
     registros_por_ano = df.groupby('Ano').size()
+
+    # Registros por Dia
+    df['Data do Fato'] = pd.to_datetime(df['Data do Fato'], format="%d/%m/%Y", errors='coerce')
+    df['Dia do Fato'] = df['Data do Fato'].dt.day
+    registros_por_dia = df.groupby(['Ano', 'Mês', 'Dia do Fato']).size().reset_index()
+    registros_por_dia['Data'] = pd.to_datetime(registros_por_dia[['Ano', 'Mês', 'Dia do Fato']], format='%Y-%m-%d')
 
     # Exibir os indicadores
     st.subheader("Indicadores")
-    st.write("Registros por Dia:")
-    st.dataframe(registros_por_dia)
     st.write("Registros por Mês:")
     st.dataframe(registros_por_mes)
     st.write("Registros por Ano:")
     st.dataframe(registros_por_ano)
-
-    # Gráfico de Registros por Dia
-    fig, ax = plt.subplots()
-    ax.bar(registros_por_dia.index, registros_por_dia.values)
-    ax.set_xlabel("Dia")
-    ax.set_ylabel("Quantidade de Registros")
-    ax.set_title("Registros por Dia")
-    st.pyplot(fig)
+    st.write("Registros por Dia:")
+    st.dataframe(registros_por_dia)
