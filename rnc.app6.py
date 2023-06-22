@@ -111,7 +111,7 @@ with st.form(key='registro_form'):
         registros_por_dia_chart = registros_por_dia.copy()
         registros_por_dia_chart['Data'] = pd.to_datetime(registros_por_dia_chart[['Ano', 'Mês', 'Dia']].astype(str).apply('/'.join, axis=1), errors='coerce')
         registros_por_dia_chart = registros_por_dia_chart.sort_values('Data')
-        st.line_chart(registros_por_dia_chart['Data'], registros_por_dia_chart[0])
+        st.line_chart(registros_por_dia_chart.set_index('Data')[0])
     
         # Registros por Mês
         registros_por_mes = df.groupby(['Ano', 'Mês']).size().reset_index()
