@@ -192,8 +192,8 @@ if df is not None:
     df['Dia do Fato'] = df['Data do Fato'].dt.day.astype(str)  # Converter para string
     registros_por_dia = df.groupby(['Ano', 'Mês', 'Dia do Fato']).size().reset_index()
 
-# Converter para formato de data
-registros_por_dia['Data'] = registros_por_dia.apply(lambda row: datetime(row['Ano'], row['Mês'], int(row['Dia do Fato'])), axis=1)
+    # Converter para formato de data
+    registros_por_dia['Data'] = registros_por_dia.apply(lambda row: datetime(row['Ano'], row['Mês'], int(row['Dia do Fato'])), axis=1)
 
 
 
