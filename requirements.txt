@@ -1,4 +1,8 @@
-python-docx
+streamlit
 pandas
+numpy
+xlrd
 openpyxl
-docx2pdf
+xlsxwriter
+python-docx
+matplotlib
