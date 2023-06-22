@@ -5,6 +5,18 @@ from docx import Document
 import base64
 import os
 
+# Título no site
+st.title("Registro de Não Conformidades")
+st.header("POP.ENF.LAB-PC 010")
+
+# Título no documento
+template_path = 'template.docx'
+doc = Document(template_path)
+doc.add_heading("Registro de Não Conformidades", level=1)
+doc.add_heading("POP.ENF.LAB-PC 010", level=2)
+
+# Restante do código...
+
 # Dados iniciais
 registros = []
 df = pd.read_excel('registros_nao_conformidades.xlsx') if 'registros_nao_conformidades.xlsx' in os.listdir() else None
