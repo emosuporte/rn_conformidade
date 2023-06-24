@@ -1,3 +1,10 @@
+import streamlit as st
+import pandas as pd
+import os
+from datetime import datetime
+from docx import Document
+import base64
+
 # Dados iniciais
 registros = []
 df = pd.read_excel('registros_nao_conformidades.xlsx') if 'registros_nao_conformidades.xlsx' in os.listdir() else None
